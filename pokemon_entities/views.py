@@ -3,10 +3,8 @@ import json
 
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
-from django.utils.timezone import now
+from django.utils.timezone import localtime
 from .models import Pokemon, PokemonEntity
-
-from datetime import datetime
 
 
 MOSCOW_CENTER = [55.751244, 37.618423]
@@ -32,7 +30,7 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 def show_all_pokemons(request):
     pokemons = Pokemon.objects.all()
-    datetime_now = now()
+    datetime_now = localtime()
     pokemon_entitys = PokemonEntity.objects.filter(
         appeared_at__lt=datetime_now,
         disappeared_at__gt=datetime_now
@@ -67,24 +65,41 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    with open('pokemon_entities/pokemons.json', encoding='utf-8') as database:
-        pokemons = json.load(database)['pokemons']
-
-    for pokemon in pokemons:
-        if pokemon['pokemon_id'] == int(pokemon_id):
-            requested_pokemon = pokemon
-            break
-    else:
+    try:
+        pokemon = Pokemon.objects.get(id=pokemon_id)
+    except:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
 
-    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    for pokemon_entity in requested_pokemon['entities']:
-        add_pokemon(
-            folium_map, pokemon_entity['lat'],
-            pokemon_entity['lon'],
-            pokemon['img_url']
+    if pokemon.photo:
+        img_url = request.build_absolute_uri(pokemon.photo.url)
+    else:
+        img_url = None
+
+
+    datetime_now = localtime()
+    pokemon_entitys = PokemonEntity.objects.filter(
+        appeared_at__lt=datetime_now,
+        disappeared_at__gt=datetime_now,
+        pokemon=pokemon
         )
 
+    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+    for pokemon_entity in pokemon_entitys:
+        add_pokemon(
+            folium_map,
+            pokemon_entity.lat,
+            pokemon_entity.lon,
+            img_url
+        )
+
+    pokemon_inf ={
+        "pokemon_id": pokemon.id,
+        "title_ru": pokemon.name,
+        "title_en": "",
+        "title_jp": "",
+        "description": "",
+        "img_url": img_url
+    }
     return render(request, 'pokemon.html', context={
-        'map': folium_map._repr_html_(), 'pokemon': pokemon
+        'map': folium_map._repr_html_(), 'pokemon': pokemon_inf
     })

@@ -1,4 +1,5 @@
 from django.db import models  # noqa F401
+from django.utils.timezone import timezone
 
 
 class Pokemon(models.Model):
