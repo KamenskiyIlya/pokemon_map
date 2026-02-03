@@ -95,9 +95,9 @@ def show_pokemon(request, pokemon_id):
     pokemon_inf ={
         "pokemon_id": pokemon.id,
         "title_ru": pokemon.name,
-        "title_en": "",
-        "title_jp": "",
-        "description": "",
+        "title_en": pokemon.name_en,
+        "title_jp": pokemon.name_jp,
+        "description": pokemon.description,
         "img_url": img_url
     }
     return render(request, 'pokemon.html', context={

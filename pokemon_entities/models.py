@@ -1,10 +1,12 @@
 from django.db import models  # noqa F401
-from django.utils.timezone import timezone
 
 
 class Pokemon(models.Model):
 	name = models.CharField(max_length=200)
 	photo = models.ImageField(upload_to='pokemon_imgs', null=True, blank=True)
+	name_en = models.CharField(max_length=200)
+	name_jp = models.CharField(max_length=200)
+	description = models.TextField()
 
 	def __str__(self):
 		return f'{self.name}'
