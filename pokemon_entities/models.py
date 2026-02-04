@@ -9,9 +9,9 @@ class Pokemon(models.Model):
 		blank=True,
 		verbose_name="Фото покемона"
 	)
-	name_en = models.CharField(max_length=200, verbose_name="Имя (en)")
-	name_jp = models.CharField(max_length=200, verbose_name="Имя (jp)")
-	description = models.TextField(verbose_name="Описание")
+	name_en = models.CharField(default=' ', max_length=200, blank=True, verbose_name="Имя (en)")
+	name_jp = models.CharField(default=' ', max_length=200, blank=True, verbose_name="Имя (jp)")
+	description = models.TextField(default=' ', blank=True, verbose_name="Описание")
 
 	previous_evolution = models.ForeignKey(
 		'self',
