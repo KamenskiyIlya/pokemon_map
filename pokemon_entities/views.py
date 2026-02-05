@@ -77,11 +77,10 @@ def show_pokemon(request, pokemon_id):
 
 
     datetime_now = localtime()
-    pokemon_entitys = PokemonEntity.objects.filter(
+    pokemon_entitys = pokemon.entitys.filter(
         appeared_at__lt=datetime_now,
-        disappeared_at__gt=datetime_now,
-        pokemon=pokemon
-        )
+        disappeared_at__gt=datetime_now
+    )
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon_entity in pokemon_entitys:
