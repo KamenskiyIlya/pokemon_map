@@ -38,7 +38,7 @@ def show_all_pokemons(request):
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon_entity in pokemon_entitys:
-        img_url = request.build_absolute_uri(pokemon_entity.pokemon.photo.url) 
+        img_url = get_url_photo(request, pokemon_entity.pokemon) 
         add_pokemon(
             folium_map,
             pokemon_entity.lat,
@@ -48,10 +48,7 @@ def show_all_pokemons(request):
 
     pokemons_on_page = []
     for pokemon in pokemons:
-        if pokemon.photo:
-            img_url = request.build_absolute_uri(pokemon.photo.url)
-        else:
-            img_url = None
+        img_url = get_url_photo(request, pokemon)
         pokemons_on_page.append({
             'pokemon_id': pokemon.id,
             'img_url': img_url,
@@ -65,19 +62,8 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    # try:
-    #     pokemon = Pokemon.objects.get(id=pokemon_id)
-    # except:
-    #     return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
-
     pokemon = get_object_or_404(Pokemon, id=pokemon_id)
-
-    if pokemon.photo:
-        img_url = request.build_absolute_uri(pokemon.photo.url)
-    else:
-        img_url = None
-
-
+    img_url = get_url_photo(request, pokemon)
     datetime_now = localtime()
     pokemon_entitys = pokemon.entitys.filter(
         appeared_at__lt=datetime_now,
@@ -96,10 +82,7 @@ def show_pokemon(request, pokemon_id):
     previous_evolution = None
     if pokemon.previous_evolution:
         prev_pokemon = pokemon.previous_evolution
-        if prev_pokemon.photo:
-            prev_img_url = request.build_absolute_uri(prev_pokemon.photo.url)
-        else:
-            prev_img_url = None
+        prev_img_url = get_url_photo(request, prev_pokemon)
         previous_evolution = {
             "title_ru": prev_pokemon.name,
             "pokemon_id": prev_pokemon.id,
@@ -109,11 +92,7 @@ def show_pokemon(request, pokemon_id):
     next_evolution = None
     next_pokemon = pokemon.next_evolutions.first()
     if next_pokemon:
-        if next_pokemon.photo:
-            next_img_url = request.build_absolute_uri(next_pokemon.photo.url)
-        else:
-            next_img_url = None
-
+        next_img_url = get_url_photo(request, next_pokemon)
         next_evolution = {
             "title_ru": next_pokemon.name,
             "pokemon_id": next_pokemon.id,
@@ -134,3 +113,11 @@ def show_pokemon(request, pokemon_id):
     return render(request, 'pokemon.html', context={
         'map': folium_map._repr_html_(), 'pokemon': pokemon_inf
     })
+
+
+def get_url_photo(request, pokemon):
+    if pokemon.photo:
+        img_url = request.build_absolute_uri(pokemon.photo.url)
+        return img_url
+    else:
+        return
